@@ -2,154 +2,214 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<title>TidyUP Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TidyUP — скачать</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&family=Unbounded:wght@600&display=swap" rel="stylesheet">
 <style>
-  :root { --bg:#0d1a17; --ink:#e6f2ee; --muted:#8fb0a7; --accent:#46c2a8; --line:#25423b; --err:#ff8a80; --ok:#46c2a8; }
+  :root {
+    --bg: #e9f1ee;
+    --ink: #10231f;
+    --muted: #4d6660;
+    --card: #ffffff;
+    --accent: #0f6b5c;
+    --accent-rgb: 15, 107, 92;
+    --accent-ink: #ffffff;
+    --line: #c5d6d0;
+    --error: #b3261e;
+    --ok: #0f6b5c;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  :root:not([data-theme="light"]) {
+    @media (prefers-color-scheme: dark) {
+      --bg: #0d1a17; --ink: #e6f2ee; --muted: #8fb0a7; --card: #14282360;
+      --accent: #46c2a8; --accent-rgb: 70, 194, 168; --accent-ink: #06201a;
+      --line: #25423b; --error: #ff8a80; --ok: #46c2a8;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0d1a17; --ink: #e6f2ee; --muted: #8fb0a7; --card: #14282360;
+    --accent: #46c2a8; --accent-rgb: 70, 194, 168; --accent-ink: #06201a;
+    --line: #25423b; --error: #ff8a80; --ok: #46c2a8;
+  }
   * { box-sizing: border-box; }
-  body { margin:0; padding:24px; background:var(--bg); color:var(--ink); font-family:system-ui,sans-serif; }
-  h1 { margin:0 0 16px; font-weight:600; }
-  .bar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; align-items:center; }
-  button, input { font:inherit; padding:9px 14px; border-radius:8px; border:1px solid var(--line); background:transparent; color:var(--ink); }
-  button { background:var(--accent); color:#06201a; border:0; cursor:pointer; font-weight:600; }
-  button.sec { background:transparent; color:var(--ink); border:1px solid var(--line); }
-  button.danger { background:#3a1a1a; color:var(--err); border:0; }
-  button:hover { opacity:.9; }
-  table { width:100%; border-collapse:collapse; margin-top:8px; }
-  th, td { padding:9px 10px; text-align:left; border-bottom:1px solid var(--line); font-size:.92rem; }
-  th { color:var(--muted); font-weight:500; }
-  code { background:#0a1512; padding:2px 6px; border-radius:4px; font-size:.85em; }
-  .msg { margin:10px 0; color:var(--muted); }
-  .msg.err { color:var(--err); }
-  .msg.ok { color:var(--ok); }
-  .pill { display:inline-block; padding:2px 8px; border-radius:999px; font-size:.78rem; }
-  .pill.on { background:#0f6b5c; color:#e6f2ee; }
-  .pill.off { background:#3a1a1a; color:var(--err); }
-  .pill.free { background:#1f3a5c; color:#b8d4ff; }
-  td.actions button { margin-right:4px; padding:6px 10px; font-size:.82rem; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Onest", system-ui, sans-serif;
+    line-height: 1.55;
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 24px 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* курсор-свечение */
+  #glow {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: radial-gradient(
+      420px circle at var(--mx, 50%) var(--my, 50%),
+      rgba(var(--accent-rgb), 0.16),
+      transparent 70%
+    );
+    transition: opacity .3s ease;
+    opacity: 0;
+  }
+  #glow.active { opacity: 1; }
+
+  main { position: relative; z-index: 1; width: 100%; max-width: 420px; }
+
+  .mark { font-family: var(--mono); font-size: .78rem; color: var(--muted); margin-bottom: 8px; }
+  h1 {
+    font-family: "Unbounded", "Onest", sans-serif;
+    font-weight: 600;
+    font-size: clamp(2rem, 8vw, 2.75rem);
+    line-height: 1.1;
+    margin: 0 0 12px;
+    letter-spacing: -0.02em;
+  }
+  p.lead { margin: 0 0 28px; color: var(--muted); max-width: 38ch; }
+
+  form {
+    background: var(--card);
+    backdrop-filter: blur(6px);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 20px;
+    transition: border-color .25s ease, box-shadow .25s ease;
+  }
+  form:focus-within {
+    border-color: rgba(var(--accent-rgb), .5);
+    box-shadow: 0 0 0 4px rgba(var(--accent-rgb), .08);
+  }
+  label { display: block; font-weight: 600; margin-bottom: 8px; }
+  input {
+    width: 100%;
+    font: inherit;
+    font-family: var(--mono);
+    font-size: 1.1rem;
+    letter-spacing: 0.08em;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1.5px solid var(--line);
+    background: transparent;
+    color: var(--ink);
+    text-transform: uppercase;
+    transition: border-color .2s ease;
+  }
+  input::placeholder { color: var(--muted); opacity: .6; }
+  input:hover { border-color: rgba(var(--accent-rgb), .55); }
+  input:focus-visible, button:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  button {
+    margin-top: 14px;
+    width: 100%;
+    font: inherit;
+    font-weight: 600;
+    padding: 13px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    cursor: pointer;
+    transition: background-color .2s ease, transform .15s ease, box-shadow .2s ease;
+  }
+  button:hover:not(:disabled) {
+    background-color: color-mix(in srgb, var(--accent) 84%, white 16%);
+    box-shadow: 0 6px 18px -6px rgba(var(--accent-rgb), .55);
+  }
+  button:active:not(:disabled) { transform: translateY(1px); }
+  button:disabled { opacity: .6; cursor: progress; }
+
+  #msg { min-height: 1.6em; margin: 14px 0 0; font-size: .95rem; }
+  #msg.error { color: var(--error); }
+  #msg.ok { color: var(--ok); }
+  footer { position: relative; z-index: 1; margin-top: 20px; font-size: .85rem; color: var(--muted); }
+  footer a { color: inherit; }
+
+  @media (hover: none) { #glow { display: none; } }
 </style>
 </head>
 <body>
-<h1>TidyUP Admin</h1>
+<div id="glow"></div>
 
-<div class="bar">
-  <input id="secret" type="password" placeholder="admin secret" style="min-width:280px">
-  <button onclick="saveSecret()">Сохранить секрет</button>
-  <button class="sec" onclick="reload()">Обновить</button>
-  <button onclick="generateKeys(5)">+ 5 ключей</button>
-  <button onclick="generateKeys(20)">+ 20 ключей</button>
-</div>
+<main>
+  <div class="mark">tidyup · v1.0</div>
+  <h1>TidyUP</h1>
 
-<div id="msg" class="msg"></div>
+  <form id="form" autocomplete="off">
+    <label for="key">Ключ доступа</label>
+    <input id="key" name="key" placeholder="XXXX-XXXX-XXXX-XXXX" maxlength="40" required spellcheck="false">
+    <button id="btn" type="submit">Скачать</button>
+    <p id="msg" role="status" aria-live="polite"></p>
+  </form>
 
-<table id="tbl">
-  <thead>
-    <tr><th>Ключ</th><th>HWID</th><th>Статус</th><th>Активирован</th><th></th></tr>
-  </thead>
-  <tbody></tbody>
-</table>
+  <footer>Нет ключа? Напиши мне: <a href="https://t.me/ТВОЙ_НИК">@ТВОЙ_НИК</a></footer>
+</main>
 
 <script>
-// ЗАМЕНИ НА СВОЙ WORKER
-const WORKER = "https://tidyup-license.newgeqq.workers.dev";
+  // Адрес твоего Worker после деплоя (без слэша на конце)
+  const WORKER_URL = "https://tidyup-license.newgeqq.workers.dev";
 
-function getSecret() {
-  return sessionStorage.getItem("adm") || "";
-}
-function saveSecret() {
-  sessionStorage.setItem("adm", document.getElementById("secret").value.trim());
-  reload();
-}
-function show(text, type) {
-  const m = document.getElementById("msg");
-  m.textContent = text;
-  m.className = "msg " + (type || "");
-}
-
-async function api(path, method = "GET", body = null) {
-  const headers = { "X-Admin-Secret": getSecret() };
-  if (body) headers["Content-Type"] = "application/json";
-  const res = await fetch(WORKER + path, {
-    method, headers, body: body ? JSON.stringify(body) : undefined,
+  // курсор-свечение
+  const glow = document.getElementById("glow");
+  let raf = null;
+  window.addEventListener("pointermove", (e) => {
+    if (raf) return;
+    raf = requestAnimationFrame(() => {
+      glow.style.setProperty("--mx", e.clientX + "px");
+      glow.style.setProperty("--my", e.clientY + "px");
+      glow.classList.add("active");
+      raf = null;
+    });
   });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Ошибка");
-  return data;
-}
+  window.addEventListener("pointerleave", () => glow.classList.remove("active"));
 
-async function reload() {
-  if (!getSecret()) { show("Введи admin secret и нажми Сохранить", "err"); return; }
-  try {
-    const data = await api("/admin/list");
-    render(data.keys);
-    show(`Ключей: ${data.keys.length}, HWID-привязок: ${data.hwidCount}`, "ok");
-  } catch (e) {
-    show(e.message, "err");
+  const form = document.getElementById("form");
+  const input = document.getElementById("key");
+  const btn = document.getElementById("btn");
+  const msg = document.getElementById("msg");
+
+  function show(text, type) {
+    msg.textContent = text;
+    msg.className = type || "";
   }
-}
 
-function render(keys) {
-  const tbody = document.querySelector("#tbl tbody");
-  tbody.innerHTML = "";
-  for (const k of keys) {
-    const tr = document.createElement("tr");
-    let status = '<span class="pill free">не активирован</span>';
-    if (k.disabled) status = '<span class="pill off">отключён</span>';
-    else if (k.hwid) status = '<span class="pill on">активен</span>';
-
-    tr.innerHTML = `
-      <td><code>${k.key}</code></td>
-      <td>${k.hwid ? `<code>${k.hwid.slice(0, 16)}…</code>` : "—"}</td>
-      <td>${status}</td>
-      <td>${k.activatedAt ? new Date(k.activatedAt).toLocaleString() : "—"}</td>
-      <td class="actions"></td>
-    `;
-    const actions = tr.querySelector(".actions");
-
-    if (k.hwid) {
-      const b = document.createElement("button");
-      b.className = "sec"; b.textContent = "Unbind";
-      b.onclick = async () => {
-        if (!confirm(`Отвязать HWID от ${k.key}?`)) return;
-        try { await api("/unbind", "POST", { key: k.key }); reload(); }
-        catch (e) { show(e.message, "err"); }
-      };
-      actions.appendChild(b);
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    btn.disabled = true;
+    show("Проверяю ключ…");
+    try {
+      const res = await fetch(WORKER_URL + "/check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key: input.value }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        show(data.error || "Не удалось проверить ключ", "error");
+      } else {
+        show("Ключ принят. Скачивание начнётся сейчас.", "ok");
+        window.location.href = data.url;
+      }
+    } catch {
+      show("Нет связи с сервером. Попробуй ещё раз позже.", "error");
+    } finally {
+      btn.disabled = false;
     }
-
-    if (!k.disabled) {
-      const b = document.createElement("button");
-      b.className = "sec"; b.textContent = "Disable";
-      b.onclick = async () => {
-        if (!confirm(`Отключить ${k.key}?`)) return;
-        try { await api("/disable", "POST", { key: k.key }); reload(); }
-        catch (e) { show(e.message, "err"); }
-      };
-      actions.appendChild(b);
-    }
-
-    const bd = document.createElement("button");
-    bd.className = "danger"; bd.textContent = "Delete";
-    bd.onclick = async () => {
-      if (!confirm(`Удалить ${k.key}? Это необратимо.`)) return;
-      try { await api("/admin/delete", "POST", { key: k.key }); reload(); }
-      catch (e) { show(e.message, "err"); }
-    };
-    actions.appendChild(bd);
-
-    tbody.appendChild(tr);
-  }
-}
-
-async function generateKeys(n) {
-  if (!getSecret()) { show("Сначала введи admin secret", "err"); return; }
-  try {
-    const data = await api("/admin/generate", "POST", { count: n });
-    show("Создано: " + data.keys.join(", "), "ok");
-    reload();
-  } catch (e) { show(e.message, "err"); }
-}
-
-if (getSecret()) reload();
+  });
 </script>
 </body>
 </html>
